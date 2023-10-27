@@ -5,32 +5,55 @@ let lengthInput = document.querySelector('#length');
 let result = document.querySelector('#result');
 const shakespeare = 5585636;
 const typingSpeed = math.bignumber(0.5); //seconds per character
-math.config({
-    number: 'BigNumber',      // Default type of number:
-    // 'number' (default), 'BigNumber', or 'Fraction'
-    precision: 5028,            // Number of significant digits for BigNumbers
-    epsilon: 1e-60
-})
-gomonkeys.addEventListener('click', function () {
-    calculateMonkeys();
+// math.config({
+//     number: 'BigNumber',      // Default type of number:
+//     // 'number' (default), 'BigNumber', or 'Fraction'
+//     precision: 5000,            // Number of significant digits for BigNumbers
+//     epsilon: 1e-60
+// })
+gomonkeys.addEventListener('click', function (e) {
+    e.preventDefault();
+    //clear results
+    result.innerHTML = "";
+    loadingScreen();
+    setTimeout(calculateMonkeys, 100);
 });
 
 //Listen for changes to prompt
 prompt.addEventListener('input', function () {
     if(prompt.value.length > 3500){
-        addWarning(`Caution: This calculation may take up to ${Math.round(prompt.value.length/5000)} minutes. The numbers involved are bigger than a computer can easily calculate. It's gonna take those monkeys a LONG time.`)
+        addWarning(`<strong>Caution: This calculation may take up to ${Math.round(prompt.value.length/5000)} minutes.</strong> The numbers involved are bigger than a computer can easily calculate. It's gonna take those monkeys a LONG time.`)
     } else {
         addWarning("");
     }
 });
 
-function calculateMonkeys() {
-    console.log("==================calculating monkeys")
+let calculateMonkeys = function() {
+    console.log("==================calculating monkeys=========================")
     let total;
     let numMonkeys;
     let attemptsNeeded;
     let promptLength = math.bignumber(prompt.value.length);
-    console.log("promptLength: " + promptLength)
+    //Use larger number formats for high numbers
+    if(promptLength < 1000){
+        console.log("small precision")
+        math.config({
+            number: 'BigNumber',      // Default type of number:
+            // 'number' (default), 'BigNumber', or 'Fraction'
+            precision: 1000,            // Number of significant digits for BigNumbers
+            epsilon: 1e-60
+        })
+    } else {
+        console.log("big precision")
+        math.config({
+            number: 'BigNumber',      // Default type of number:
+            // 'number' (default), 'BigNumber', or 'Fraction'
+            precision: 10000,            // Number of significant digits for BigNumbers
+            epsilon: 1e-60
+        })
+    }
+    console.log("precison " + math.config().precision)
+    //console.log("promptLength: " + promptLength)
     promptLength = math.bignumber(Number(promptLength));
     let minValue = math.multiply(math.subtract(promptLength, math.bignumber(1)), typingSpeed);
     //Check if prompt is empty
@@ -41,6 +64,7 @@ function calculateMonkeys() {
         return;
     }
     //Check if monkeys are infinite
+    console.log("checking if monkeys are infinite")
     if (monkeys.value == "infinite") {
         total = minValue
         clearResults();
@@ -50,6 +74,7 @@ function calculateMonkeys() {
         addResult(`<p>Infinite monkeys will produce <a href="https://en.wikipedia.org/wiki/Infinite_monkey_theorem">any amount of text</a> at the speed they can type.</p><p> However, infinity is much, much bigger than very large numbers.</p> </p>Try changing to a very large number of monkeys to see the difference!</p>`);
         return;
     }
+    console.log("deciding whether to use auto math or manual math")
     numMonkeys = math.bignumber(monkeys.value);
     if(promptLength < 3500){
         console.log("using auto math")
@@ -59,7 +84,7 @@ function calculateMonkeys() {
         console.log("using manual math")
         attemptsNeeded = manualMath(numMonkeys, promptLength);
     }
-    console.log("attemptsNeeded: " + formatNumber(attemptsNeeded));
+    //console.log("attemptsNeeded: " + formatNumber(attemptsNeeded));
 
     //Calculate total time to type
     total = math.multiply(attemptsNeeded, typingSpeed);
@@ -68,21 +93,22 @@ function calculateMonkeys() {
     total = math.add(total, minValue);
 
     //Check how many got it right on the first try
+    console.log("calculating first try")
     let firstTry = calculateFirstTry(numMonkeys, promptLength);
-
+    console.log("converting to units")
     let unit;
     let totalNumeric;
     //Convert number of monkeys to words
     let numMonkeysPrinted = monkeys.options[monkeys.selectedIndex].text;
     //convert to num
     if (total.toNumber() > Number.MAX_SAFE_INTEGER) {
-        console.log("total too big");
+        //console.log("total too big");
         total = math.divide(total, 31536000);
         totalNumeric = total;
         total = formatNumber(total);
         unit = "years";
     } else {
-        console.log("total fits");
+        //console.log("total fits");
         total = math.bignumber(formatNumber(total));
         total = total.toNumber();
         //Convert result to convenient format
@@ -109,11 +135,12 @@ function calculateMonkeys() {
         } else {
             total = math.format(total, { precision: 3 })
         }
-        console.log("total: " + total + " " + unit);
+        //console.log("total: " + total + " " + unit);
     }
     //Clear results
     result.innerHTML = "";
     //Remove plurals if number is one
+    console.log("checking plurals")
     let monkeyPlural;
     if (numMonkeysPrinted == "one") {
         monkeyPlural = "monkey";
@@ -125,6 +152,7 @@ function calculateMonkeys() {
     }
 
     //Add results
+    console.log("adding results")
     addResult(`<p>It would take ${numMonkeysPrinted} ${monkeyPlural}</p><p class="time bold"> ${total} ${unit}</p> <p>to type "${prompt.value}" (on average).</p>`);
     //Check for first try monkeys
     if (firstTry.toNumber() > 0) {
@@ -134,14 +162,16 @@ function calculateMonkeys() {
             addResult(`${math.format(firstTry, { precision: 10 })} monkeys got it right on their first try. Good job monkeys!`);
         }
     }
+    console.log("getting time comparisons")
     let bestComparison = numberComparison(totalNumeric, unit);
     if(bestComparison){
         addResult(`<p>That's about ${bestComparison}.</p>`);
     }
     //Comparisons for numbers of monkeys
+    console.log("getting monkey comparisons")
     let monkeyComparisonText = monkeyComparison(numMonkeysPrinted);
     if(monkeyComparisonText){
-        console.log("monkey comparison text: " + monkeyComparisonText)
+        //console.log("monkey comparison text: " + monkeyComparisonText)
         addResult(`<p>${monkeyComparisonText}.</p>`);
     }
     // let totalKeys = math.multiply(attemptsNeeded, numMonkeys);
@@ -163,7 +193,7 @@ function calculateMonkeys() {
     // let attemptsNeededText;
     // if (numMonkeys.toNumber() != 1) {
     //     if (attemptsNeeded.toNumber() < 9007199254740991) {
-    //         console.log("attempts needed is small enough to convert to words")
+    //         //console.log("attempts needed is small enough to convert to words")
     //         attemptsNeededText = numberToWords.toWords(
     //             attemptsNeeded.toNumber()
     //             );
@@ -175,7 +205,7 @@ function calculateMonkeys() {
     //             attemptsNeededText = attemptsNeededText[0] + "," + attemptsNeededText[1];
     //         }
     //     } else {
-    //         console.log("attempts needed is too big to convert to words")
+    //         //console.log("attempts needed is too big to convert to words")
     //         attemptsNeededText = math.format(attemptsNeeded, { precision: 10 });
     //     }
 
@@ -183,6 +213,22 @@ function calculateMonkeys() {
     // }
     
 }
+
+
+function loadingScreen(){
+    //Check if results exist already
+    if(result.innerHTML != ""){
+        return;
+    }
+    //Add loading screen
+    result.innerHTML = `
+    <div class="loading">
+        <img src="loading.png" alt="">
+        <p>Simulating monkeys...</p>
+    </div>`;
+    return;
+}
+
 function addResult(text) {
     let results = document.createElement('p');
     results.innerHTML = text;
@@ -201,6 +247,7 @@ function autoMath(numMonkeys, promptLength){
     let oneMinusChanceOfSuccess = math.subtract(math.bignumber(1), chanceOfSuccessOneMonkey);
     console.log("oneMinusChanceOfSuccess: " + formatNumber(oneMinusChanceOfSuccess));
     let chanceOfFailure = math.pow(oneMinusChanceOfSuccess, numMonkeys);
+    console.log("got chance of failure")
     console.log("chanceOfFailure: " + formatNumber(chanceOfFailure));
     let chanceAllMonkeys = math.subtract(math.bignumber(1), chanceOfFailure);
     console.log("chanceAllMonkeys: " + formatNumber(chanceAllMonkeys));
@@ -214,11 +261,11 @@ function manualMath(numMonkeys, promptLength){
     let monkeysLeft = numMonkeys;
     for(let i = 0; i < promptLength; i++){
         monkeysLeft = math.multiply(monkeysLeft, chanceOneKey);
-        console.log("index: " + i + " monkeysLeft: " + formatNumber(monkeysLeft));
+        //console.log("index: " + i + " monkeysLeft: " + formatNumber(monkeysLeft));
     }
-    console.log("final monkeysLeft: " + formatNumber(monkeysLeft));
+    //console.log("final monkeysLeft: " + formatNumber(monkeysLeft));
     let attempts = math.divide(math.bignumber(1), monkeysLeft);
-    console.log("attempts: " + formatNumber(attempts));
+    //console.log("attempts: " + formatNumber(attempts));
     return attempts;
 }
 
@@ -236,7 +283,7 @@ function calculateFirstTry(numMonkeys, promptLength){
         promptLength
         );
     let expectedSuccesses = math.multiply(numMonkeys, chanceOfSuccessOneMonkey);
-    console.log("expectedSuccesses: " + formatNumber(expectedSuccesses));
+    //console.log("expectedSuccesses: " + formatNumber(expectedSuccesses));
     if(expectedSuccesses.toNumber() < 1){
         return math.bignumber(0);
     } else {
@@ -265,36 +312,40 @@ function numberComparison(number, unit){
     //Get all comparison numbers which divide evenly into the number
     let closestNumber = [];
     number = math.bignumber(number);
+    console.log("number to find a time comparison for " + number);
     for(let key in comparisonObject){
         key = math.bignumber(key)
         let remainder = math.mod(number, key);
-        let grace = math.divide(number, 5);
-        console.log("number " + number + " key: " + key)
-        console.log("remainder: " + remainder + " grace: " + grace)
+        let grace = math.divide(number, 4);
+        //console.log("number " + number + " key: " + key)
+        //console.log("remainder: " + remainder + " grace: " + grace)
         if(math.compare(grace, remainder) == 1 && math.compare(number, key) == 1 && math.compare(number, math.subtract(key, math.multiply(grace,key))) == 1){
             closestNumber.push([comparisonObject[key.toNumber()], math.round(math.divide(number,key))]);
         }
     }
+    console.log(closestNumber);
     //Sort by closest number
-    closestNumber.sort(function(a, b){
-        return a[1] - b[1];
+    closestNumber = closestNumber.sort(function(a, b){
+        console.log(math.compare(a[1], b[1]).toNumber())
+        return (math.compare(a[1], b[1]).toNumber());
     });
     //Return the closest number
     console.log(closestNumber)
     if(closestNumber.length == 0){
         return;
     }
-    console.log("closestNumber: " + closestNumber[0][0]);
+    console.log("closestNumber: " + closestNumber[0]);
     closestNumber[0][1] = formatNumber(closestNumber[0][1]);
+    console.log("closestNumber: " + closestNumber[0]);
     if(closestNumber[0][1] == 1){
         return closestNumber[0][0];
     }
-    return `${Math.round(closestNumber[0][1])} times ${closestNumber[0][0]}`
+    return `${closestNumber[0][1]} times ${closestNumber[0][0]}`
 }
 
 function monkeyComparison(numMonkeys){
-    console.log("gettinc monkey comparisons");
-    console.log("numMonkeys: " + numMonkeys)
+    //console.log("gettinc monkey comparisons");
+    //console.log("numMonkeys: " + numMonkeys)
     if(numMonkeys == "one hundred thousand"){
         return `That's about the population of Gorillas on earth right now. You could make it happen!`;
     } else if (numMonkeys == "ten million"){
@@ -328,12 +379,18 @@ let timeComparisonYears = {
     40: "the average lifespan of a Babboon, so you'll have to replace them at some point",
     195: "<a href='https://what-if.xkcd.com/11/'>how long you would have to stand outside with your mouth open before a bird pooped in it</a>",
     500: "as long as the Roman Empire lasted",
+    4855: "the age of Methusalah, the oldest living tree",
     300000: "as long as Homo Sapiens has existed",
+    100000: "as long as the time between ice ages",
     12000: "as long as humans have been farming",
+    700000: "the time between Yellowstone explosions",
     8000000: "as long as Chimpanzees have existed",
     150000000: "as long as Dinosaurs ruled the earth",
     230000000: "how long it takes our sun to orbit the Milky Way",
     3700000000: "how long life has existed on Earth",
-    13700000000: "the age of the universe",
+    13700000000: "the current age of the universe",
     10000000000000: "the expected lifespan of the universe, in the heat death model",
 }
+
+//TODO: More comparisons
+//TODO: Analytics
