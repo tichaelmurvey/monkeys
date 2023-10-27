@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100;200;300;400;500&family=Sometype+Mono&display=swap');
+body {
+    font-family: 'Playpen Sans', cursive;
+    font-size: 30px;
+    text-align: center;
+    background-image: url("banana.png");
+}
+
+.selectcontainer {
+    display: flex;
+    justify-content: center;
+}
+
+.form {
+    background-color: rgb(252, 255, 240);
+    max-width: 90%;
+    min-width: 300px;
+    width: 800px;
+    padding: 20px;
+    margin: auto;
+    border-radius: 10px;
+    margin-top: 70px;
+}
+
+.selectcontainer > * {
+    margin: 0 10px;
+}
+
+select, button {
+    font-family: 'Playpen Sans', cursive;
+    font-size: 20px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+textarea {
+    font-family: 'Sometype Mono', monospace;
+    font-size: 20px;
+}
+.bold {
+    font-weight: bold;
+}
+
+img {
+    width: 50%;
+    border-radius: 20px;
+}
