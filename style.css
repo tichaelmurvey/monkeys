@@ -9,7 +9,17 @@ body {
 
 .selectcontainer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
+}
+
+@media screen and (max-width: 800px) {
+    .form {
+        width: 80vw !important;
+    }
+    footer {
+        width: 80vw !important;
+    }
 }
 
 .form {
@@ -22,6 +32,8 @@ body {
     border-radius: 10px;
     margin-top: 70px;
 }
+
+
 
 .selectcontainer > * {
     margin: 0 10px;
@@ -61,6 +73,7 @@ img {
 
 #result {
     min-height: 400px;
+    overflow-wrap: break-word;
 }
 
 .loading {
@@ -113,4 +126,8 @@ footer a.fun {
     font-weight: bold;
     color:rgb(0, 0, 0);
     text-decoration: none;
+}
+
+textarea {
+    max-width: 100%;
 }
