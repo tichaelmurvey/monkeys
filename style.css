@@ -39,21 +39,25 @@ body {
     margin: 0 10px;
 }
 
-select, button {
+select, button, .coffee {
     font-family: 'Playpen Sans', cursive;
     font-size: 20px;
     padding: 5px;
     border-radius: 5px;
 }
 
-button {
+button, .coffee {
     background-color: rgb(255, 255, 255);
     border: 1px solid rgb(0, 0, 0);
     cursor: pointer;
     transition: 0.3s;
 }
+.coffee {
+    text-decoration: none;
+    color: rgb(0, 0, 0);
+}
 
-button:hover {
+button:hover, .coffee:hover {
     background-color: rgb(0, 0, 0);
     color: rgb(255, 255, 255);
 }
